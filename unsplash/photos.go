@@ -72,6 +72,8 @@ func (o GetRandomPhotosOptions) query() url.Values {
 		query.Set("orientation", string(o.Orientation))
 	}
 
+	// always set count param. If this param do not present in query - response
+	// will be an object, not list.
 	query.Set("count", strconv.Itoa(o.Count))
 
 	return query
