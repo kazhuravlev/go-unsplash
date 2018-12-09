@@ -39,6 +39,10 @@ func (o GetRandomPhotosOptions) validate() error {
 		return ErrBadRequest
 	}
 
+	if o.Query != "" && len(o.Collections) != 0 {
+		return ErrBadRequest
+	}
+
 	return nil
 }
 
