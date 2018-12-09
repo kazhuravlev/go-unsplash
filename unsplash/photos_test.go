@@ -23,7 +23,7 @@ func TestClient_GetRandomPhotos(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, rl)
 	assert.True(t, rl.Limit >= minLimits)
-	assert.True(t, rl.Remaining > 0)
+	assert.NotEqual(t, rl.Remaining, 0)
 
 	assert.NotNil(t, photos)
 	assert.Len(t, photos, n)
@@ -40,7 +40,7 @@ func TestClient_GetPhotos(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, rl)
 	assert.True(t, rl.Limit >= minLimits)
-	assert.True(t, rl.Remaining > 0)
+	assert.NotEqual(t, rl.Remaining, 0)
 
 	assert.NotNil(t, photos)
 	assert.Len(t, photos, n)
@@ -57,7 +57,7 @@ func TestClient_GetCuratedPhotos(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, rl)
 	assert.True(t, rl.Limit >= minLimits)
-	assert.True(t, rl.Remaining > 0)
+	assert.NotEqual(t, rl.Remaining, 0)
 
 	assert.NotNil(t, photos)
 	assert.Len(t, photos, n)
@@ -74,7 +74,7 @@ func TestClient_GetPhoto(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, rl)
 	assert.True(t, rl.Limit >= minLimits)
-	assert.True(t, rl.Remaining > 0)
+	assert.NotEqual(t, rl.Remaining, 0)
 
 	assert.NotNil(t, photo)
 	assert.Equal(t, photo.ID, id)
@@ -90,7 +90,7 @@ func TestClient_GetPhotoStatistics(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, rl)
 	assert.True(t, rl.Limit >= minLimits)
-	assert.True(t, rl.Remaining > 0)
+	assert.NotEqual(t, rl.Remaining, 0)
 
 	assert.NotNil(t, photo)
 	assert.Equal(t, photo.ID, id)
@@ -105,7 +105,7 @@ func TestClient_GetPhotoDownload(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, rl)
 	assert.True(t, rl.Limit >= minLimits)
-	assert.True(t, rl.Remaining > 0)
+	assert.NotEqual(t, rl.Remaining, 0)
 
 	assert.NotNil(t, photo)
 	assert.Equal(t, photo.URL, "https://images.unsplash.com/photo-1536167038724-17be8c5e6876?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb")
@@ -120,7 +120,7 @@ func TestClient_UpdatePhoto(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, rl)
 	assert.True(t, rl.Limit >= minLimits)
-	assert.True(t, rl.Remaining > 0)
+	assert.NotEqual(t, rl.Remaining, 0)
 
 	assert.NotNil(t, photo)
 	assert.Equal(t, photo.Location.Name, "example")
