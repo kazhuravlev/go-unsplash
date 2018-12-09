@@ -331,3 +331,33 @@ func (c *Client) GetPhotoStatistics(ctx context.Context, opts GetPhotoStatistics
 
 	return &stat, nil
 }
+
+func (c *Client) GetPhotoDownload(ctx context.Context, id string) (*PhotoDownload, error) {
+	if id == "" {
+		return nil, ErrBadRequest
+	}
+
+	u := fmt.Sprintf("%s/photos/%s/download", apiURL, id)
+
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, handleError(resp)
+	}
+
+	var download PhotoDownload
+	if err := json.NewDecoder(resp.Body).Decode(&download); err != nil {
+		return nil, err
+	}
+
+	return &download, nil
+}

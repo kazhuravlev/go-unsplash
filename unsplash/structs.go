@@ -125,3 +125,7 @@ type PhotoStatistics struct {
 	Views     Stat   `json:"views"`
 	Likes     Stat   `json:"likes"`
 }
+
+type PhotoDownload struct {
+	URL string `json:"url"`
+}

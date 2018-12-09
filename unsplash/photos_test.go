@@ -75,3 +75,15 @@ func TestClient_GetPhotoStatistics(t *testing.T) {
 	assert.NotNil(t, photo)
 	assert.Equal(t, photo.ID, id)
 }
+
+func TestClient_GetPhotoDownload(t *testing.T) {
+	c, err := unsplash.New(unsplash.WithHttpClient(httpClient))
+	require.Nil(t, err)
+
+	id := "Mg0W1N_yDv0"
+	photo, err := c.GetPhotoDownload(context.Background(), id)
+	require.Nil(t, err)
+
+	assert.NotNil(t, photo)
+	assert.Equal(t, photo.URL, "https://images.unsplash.com/photo-1536167038724-17be8c5e6876?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb")
+}
