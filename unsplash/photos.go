@@ -29,6 +29,10 @@ func (c *Client) GetRandomPhotos(ctx context.Context, opts GetRandomPhotosOption
 		return nil, ErrBadRequest
 	}
 
+	if opts.Count < 0 {
+		return nil, ErrBadRequest
+	}
+
 	query := url.Values{}
 	query.Set("collections", strings.Join(opts.Collections, ","))
 	query.Set("featured", opts.Featured)
