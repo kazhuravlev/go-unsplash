@@ -15,6 +15,8 @@ type Position struct {
 }
 
 type Location struct {
+	Title    string   `json:"title"`
+	Name     string   `json:"name"`
 	City     string   `json:"city"`
 	Country  string   `json:"country"`
 	Position Position `json:"position"`
@@ -51,20 +53,32 @@ type UserLinks struct {
 	Photos    string `json:"photos"`
 	Likes     string `json:"likes"`
 	Portfolio string `json:"portfolio"`
+	Following string `json:"following"`
+	Followers string `json:"followers"`
 }
 
 type User struct {
-	ID               string    `json:"id"`
-	UpdatedAt        string    `json:"updated_at"`
-	Username         string    `json:"username"`
-	Name             string    `json:"name"`
-	PortfolioURL     string    `json:"portfolio_url"`
-	Bio              string    `json:"bio"`
-	Location         string    `json:"location"`
-	TotalLikes       int       `json:"total_likes"`
-	TotalPhotos      int       `json:"total_photos"`
-	TotalCollections int       `json:"total_collections"`
-	Links            UserLinks `json:"links"`
+	ID                string    `json:"id"`
+	UpdatedAt         string    `json:"updated_at"`
+	Username          string    `json:"username"`
+	Name              string    `json:"name"`
+	PortfolioURL      string    `json:"portfolio_url"`
+	Bio               string    `json:"bio"`
+	Location          string    `json:"location"`
+	TotalLikes        int       `json:"total_likes"`
+	TotalPhotos       int       `json:"total_photos"`
+	TotalCollections  int       `json:"total_collections"`
+	Links             UserLinks `json:"links"`
+	InstagramUsername string    `json:"instagram_username"`
+	AcceptedTos       bool      `json:"accepted_tos"`
+	ProfileImage      struct {
+		Small  string `json:"small"`
+		Medium string `json:"medium"`
+		Large  string `json:"large"`
+	} `json:"profile_image"`
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	TwitterUsername string `json:"twitter_username"`
 }
 
 type Photo struct {
@@ -74,14 +88,20 @@ type Photo struct {
 	Width                  int                     `json:"width"`
 	Height                 int                     `json:"height"`
 	Color                  string                  `json:"color"`
+	Description            string                  `json:"description"`
+	Sponsored              bool                    `json:"sponsored"`
+	SponsoredBy            interface{}             `json:"sponsored_by"`
+	SponsoredImpressionsID interface{}             `json:"sponsored_impressions_id"`
 	Downloads              int                     `json:"downloads"`
 	Likes                  int                     `json:"likes"`
 	LikedByUser            bool                    `json:"liked_by_user"`
-	Description            string                  `json:"description"`
 	Exif                   Exif                    `json:"exif"`
 	Location               Location                `json:"location"`
 	CurrentUserCollections []CurrentUserCollection `json:"current_user_collections"`
 	Urls                   Urls                    `json:"urls"`
 	Links                  PhotoLinks              `json:"links"`
 	User                   User                    `json:"user"`
+	Categories             []string                `json:"categories"`
+	Views                  int                     `json:"views"`
+	Slug                   string                  `json:"slug"`
 }
