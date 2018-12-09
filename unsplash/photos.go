@@ -149,3 +149,33 @@ func (c *Client) GetPhotos(ctx context.Context, opts GetPhotosOptions) ([]Photo,
 
 	return photos, nil
 }
+
+func (c *Client) GetCuratedPhotos(ctx context.Context, opts GetPhotosOptions) ([]Photo, error) {
+	if err := opts.validate(); err != nil {
+		return nil, err
+	}
+
+	u := apiURL + "/photos/curated?" + opts.query().Encode()
+
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, handleError(resp)
+	}
+
+	var photos []Photo
+	if err := json.NewDecoder(resp.Body).Decode(&photos); err != nil {
+		return nil, err
+	}
+
+	return photos, nil
+}

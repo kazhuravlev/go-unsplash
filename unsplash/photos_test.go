@@ -37,3 +37,17 @@ func TestClient_GetPhotos(t *testing.T) {
 
 	fmt.Println(photos[0].Urls.Full)
 }
+
+func TestClient_GetCuratedPhotos(t *testing.T) {
+	c, err := unsplash.New(unsplash.WithHttpClient(httpClient))
+	require.Nil(t, err)
+
+	n := 30
+	photos, err := c.GetCuratedPhotos(context.Background(), unsplash.GetPhotosOptions{PerPage: n})
+	require.Nil(t, err)
+
+	assert.NotNil(t, photos)
+	assert.Len(t, photos, n)
+
+	fmt.Println(photos[0].Urls.Full)
+}
