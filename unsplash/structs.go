@@ -9,13 +9,15 @@ type Exif struct {
 	Iso          int    `json:"iso"`
 }
 
+type Position struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
 type Location struct {
-	City     string `json:"city"`
-	Country  string `json:"country"`
-	Position struct {
-		Latitude  float64 `json:"latitude"`
-		Longitude float64 `json:"longitude"`
-	} `json:"position"`
+	City     string   `json:"city"`
+	Country  string   `json:"country"`
+	Position Position `json:"position"`
 }
 
 type CurrentUserCollection struct {
@@ -43,24 +45,26 @@ type PhotoLinks struct {
 	DownloadLocation string `json:"download_location"`
 }
 
+type UserLinks struct {
+	Self      string `json:"self"`
+	HTML      string `json:"html"`
+	Photos    string `json:"photos"`
+	Likes     string `json:"likes"`
+	Portfolio string `json:"portfolio"`
+}
+
 type User struct {
-	ID               string `json:"id"`
-	UpdatedAt        string `json:"updated_at"`
-	Username         string `json:"username"`
-	Name             string `json:"name"`
-	PortfolioURL     string `json:"portfolio_url"`
-	Bio              string `json:"bio"`
-	Location         string `json:"location"`
-	TotalLikes       int    `json:"total_likes"`
-	TotalPhotos      int    `json:"total_photos"`
-	TotalCollections int    `json:"total_collections"`
-	Links            struct {
-		Self      string `json:"self"`
-		HTML      string `json:"html"`
-		Photos    string `json:"photos"`
-		Likes     string `json:"likes"`
-		Portfolio string `json:"portfolio"`
-	} `json:"links"`
+	ID               string    `json:"id"`
+	UpdatedAt        string    `json:"updated_at"`
+	Username         string    `json:"username"`
+	Name             string    `json:"name"`
+	PortfolioURL     string    `json:"portfolio_url"`
+	Bio              string    `json:"bio"`
+	Location         string    `json:"location"`
+	TotalLikes       int       `json:"total_likes"`
+	TotalPhotos      int       `json:"total_photos"`
+	TotalCollections int       `json:"total_collections"`
+	Links            UserLinks `json:"links"`
 }
 
 type Photo struct {
