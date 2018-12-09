@@ -80,34 +80,39 @@ func (o GetRandomPhotosOptions) query() url.Values {
 	return query
 }
 
-func (c *Client) GetRandomPhotos(ctx context.Context, opts GetRandomPhotosOptions) ([]Photo, error) {
+func (c *Client) GetRandomPhotos(ctx context.Context, opts GetRandomPhotosOptions) ([]Photo, *RateLimit, error) {
 	if err := opts.validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	u := apiURL + "/photos/random?" + opts.query().Encode()
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, handleError(resp)
+		return nil, rl, handleError(resp)
 	}
 
 	var photos []Photo
 	if err := json.NewDecoder(resp.Body).Decode(&photos); err != nil {
-		return nil, err
+		return nil, rl, err
 	}
 
-	return photos, nil
+	return photos, rl, nil
 }
 
 type OrderBy string
@@ -164,94 +169,109 @@ func (o GetPhotosOptions) query() url.Values {
 	return query
 }
 
-func (c *Client) GetPhotos(ctx context.Context, opts GetPhotosOptions) ([]Photo, error) {
+func (c *Client) GetPhotos(ctx context.Context, opts GetPhotosOptions) ([]Photo, *RateLimit, error) {
 	if err := opts.validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	u := apiURL + "/photos?" + opts.query().Encode()
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, handleError(resp)
+		return nil, rl, handleError(resp)
 	}
 
 	var photos []Photo
 	if err := json.NewDecoder(resp.Body).Decode(&photos); err != nil {
-		return nil, err
+		return nil, rl, err
 	}
 
-	return photos, nil
+	return photos, rl, nil
 }
 
-func (c *Client) GetCuratedPhotos(ctx context.Context, opts GetPhotosOptions) ([]Photo, error) {
+func (c *Client) GetCuratedPhotos(ctx context.Context, opts GetPhotosOptions) ([]Photo, *RateLimit, error) {
 	if err := opts.validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	u := apiURL + "/photos/curated?" + opts.query().Encode()
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, handleError(resp)
+		return nil, rl, handleError(resp)
 	}
 
 	var photos []Photo
 	if err := json.NewDecoder(resp.Body).Decode(&photos); err != nil {
-		return nil, err
+		return nil, rl, err
 	}
 
-	return photos, nil
+	return photos, rl, nil
 }
 
-func (c *Client) GetPhoto(ctx context.Context, id string) (*Photo, error) {
+func (c *Client) GetPhoto(ctx context.Context, id string) (*Photo, *RateLimit, error) {
 	if id == "" {
-		return nil, ErrBadRequest
+		return nil, nil, ErrBadRequest
 	}
 
 	u := apiURL + "/photos/" + id
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, handleError(resp)
+		return nil, rl, handleError(resp)
 	}
 
 	var photo Photo
 	if err := json.NewDecoder(resp.Body).Decode(&photo); err != nil {
-		return nil, err
+		return nil, rl, err
 	}
 
-	return &photo, nil
+	return &photo, rl, nil
 }
 
 type Resolution string
@@ -302,64 +322,74 @@ func (o GetPhotoStatisticsOptions) query() url.Values {
 	return query
 }
 
-func (c *Client) GetPhotoStatistics(ctx context.Context, opts GetPhotoStatisticsOptions) (*PhotoStatistics, error) {
+func (c *Client) GetPhotoStatistics(ctx context.Context, opts GetPhotoStatisticsOptions) (*PhotoStatistics, *RateLimit, error) {
 	if err := opts.validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	u := fmt.Sprintf("%s/photos/%s/statistics?%s", apiURL, opts.ID, opts.query().Encode())
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, handleError(resp)
+		return nil, rl, handleError(resp)
 	}
 
 	var stat PhotoStatistics
 	if err := json.NewDecoder(resp.Body).Decode(&stat); err != nil {
-		return nil, err
+		return nil, rl, err
 	}
 
-	return &stat, nil
+	return &stat, rl, nil
 }
 
-func (c *Client) GetPhotoDownload(ctx context.Context, id string) (*PhotoDownload, error) {
+func (c *Client) GetPhotoDownload(ctx context.Context, id string) (*PhotoDownload, *RateLimit, error) {
 	if id == "" {
-		return nil, ErrBadRequest
+		return nil, nil, ErrBadRequest
 	}
 
 	u := fmt.Sprintf("%s/photos/%s/download", apiURL, id)
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, handleError(resp)
+		return nil, rl, handleError(resp)
 	}
 
 	var download PhotoDownload
 	if err := json.NewDecoder(resp.Body).Decode(&download); err != nil {
-		return nil, err
+		return nil, rl, err
 	}
 
-	return &download, nil
+	return &download, rl, nil
 }
 
 type Confidential int
@@ -457,32 +487,37 @@ func (o UpdatePhotoOptions) query() url.Values {
 	return query
 }
 
-func (c *Client) UpdatePhoto(ctx context.Context, opts UpdatePhotoOptions) (*Photo, error) {
+func (c *Client) UpdatePhoto(ctx context.Context, opts UpdatePhotoOptions) (*Photo, *RateLimit, error) {
 	if err := opts.validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	u := fmt.Sprintf("%s/photos/%s?%s", apiURL, opts.ID, opts.query().Encode())
 
 	req, err := http.NewRequest(http.MethodPut, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, handleError(resp)
+		return nil, rl, handleError(resp)
 	}
 
 	var photo Photo
 	if err := json.NewDecoder(resp.Body).Decode(&photo); err != nil {
-		return nil, err
+		return nil, rl, err
 	}
 
-	return &photo, nil
+	return &photo, rl, nil
 }
