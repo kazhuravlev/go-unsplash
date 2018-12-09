@@ -361,3 +361,128 @@ func (c *Client) GetPhotoDownload(ctx context.Context, id string) (*PhotoDownloa
 
 	return &download, nil
 }
+
+type Confidential int
+
+const (
+	ConfidentialYes Confidential = iota
+	ConfidentialNo
+)
+
+type UpdateLocation struct {
+	Latitude     float64
+	Longitude    float64
+	Name         string
+	City         string
+	Country      string
+	Confidential Confidential
+}
+
+type UpdateExif struct {
+	Make            string
+	Models          string
+	ExposureTime    string
+	ApertureValue   string
+	FocalLength     string
+	ISOSpeedRatings string
+}
+
+type UpdatePhotoOptions struct {
+	ID       string
+	Location UpdateLocation
+	Exif     UpdateExif
+}
+
+func (o UpdatePhotoOptions) validate() error {
+
+	return nil
+}
+
+func (o UpdatePhotoOptions) query() url.Values {
+	query := url.Values{}
+
+	exif := o.Exif
+	if exif.Make != "" {
+		query.Set("exif[make]", exif.Make)
+	}
+
+	if exif.Models != "" {
+		query.Set("exif[models]", exif.Models)
+	}
+
+	if exif.ExposureTime != "" {
+		query.Set("exif[exposure_time]", exif.ExposureTime)
+	}
+
+	if exif.ApertureValue != "" {
+		query.Set("exif[aperture_value]", exif.ApertureValue)
+	}
+
+	if exif.FocalLength != "" {
+		query.Set("exif[focal_length]", exif.FocalLength)
+	}
+
+	if exif.ISOSpeedRatings != "" {
+		query.Set("exif[iso_speed_ratings]", exif.ISOSpeedRatings)
+	}
+
+	location := o.Location
+	if location.Latitude != 0 {
+		query.Set("location[latitude]", strconv.FormatFloat(location.Latitude, 'f', 10, 64))
+	}
+
+	if location.Longitude != 0 {
+		query.Set("location[longitude]", strconv.FormatFloat(location.Longitude, 'f', 10, 64))
+	}
+
+	if location.Name != "" {
+		query.Set("location[name]", location.Name)
+	}
+
+	if location.City != "" {
+		query.Set("location[city]", location.City)
+	}
+
+	if location.Country != "" {
+		query.Set("location[country]", location.Country)
+	}
+
+	switch location.Confidential {
+	case ConfidentialYes:
+		query.Set("location[confidential]", "true")
+	case ConfidentialNo:
+		query.Set("location[confidential]", "false")
+	}
+
+	return query
+}
+
+func (c *Client) UpdatePhoto(ctx context.Context, opts UpdatePhotoOptions) (*Photo, error) {
+	if err := opts.validate(); err != nil {
+		return nil, err
+	}
+
+	u := fmt.Sprintf("%s/photos/%s?%s", apiURL, opts.ID, opts.query().Encode())
+
+	req, err := http.NewRequest(http.MethodPut, u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, handleError(resp)
+	}
+
+	var photo Photo
+	if err := json.NewDecoder(resp.Body).Decode(&photo); err != nil {
+		return nil, err
+	}
+
+	return &photo, nil
+}
