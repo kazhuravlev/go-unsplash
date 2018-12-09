@@ -2,10 +2,6 @@ package unsplash_test
 
 import (
 	"context"
-	"fmt"
-	"github.com/kazhuravlev/go-unsplash/unsplash"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 	"log"
 	"net/http"
@@ -44,17 +40,4 @@ func TestMain(m *testing.M) {
 	httpClient = oauth2.NewClient(context.Background(), source)
 
 	os.Exit(m.Run())
-}
-
-func TestGetRandomPhotos(t *testing.T) {
-	c, err := unsplash.New(unsplash.WithHttpClient(httpClient))
-	require.Nil(t, err)
-
-	photos, err := c.GetRandomPhotos(context.Background(), unsplash.GetRandomPhotosOptions{Orientation: unsplash.OrientationLandscape})
-	require.Nil(t, err)
-
-	assert.NotNil(t, photos)
-	assert.Len(t, photos, 1)
-
-	fmt.Println(photos[0].Urls.Full)
 }

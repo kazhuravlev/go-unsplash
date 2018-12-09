@@ -65,3 +65,87 @@ func (c *Client) GetRandomPhotos(ctx context.Context, opts GetRandomPhotosOption
 
 	return photos, nil
 }
+
+type OrderBy string
+
+const (
+	OrderByLatest  OrderBy = "latest"
+	OrderByOldest  OrderBy = "oldest"
+	OrderByPopular OrderBy = "popular"
+)
+
+type GetPhotosOptions struct {
+	// Page is Page number to retrieve
+	Page int
+	// Per_page is Number of items per page
+	PerPage int
+	// Order_by is How to sort the photos
+	OrderBy OrderBy
+}
+
+func (o GetPhotosOptions) validate() error {
+	if o.Page < 0 {
+		return ErrBadRequest
+	}
+
+	if o.PerPage < 0 {
+		return ErrBadRequest
+	}
+
+	if o.PerPage > maxListItems {
+		return ErrBadRequest
+	}
+
+	return nil
+}
+
+func (o GetPhotosOptions) query() url.Values {
+	query := url.Values{}
+	if o.Page == 0 {
+		o.Page = 1
+	}
+
+	if o.PerPage == 0 {
+		o.PerPage = 10
+	}
+
+	if o.OrderBy == "" {
+		o.OrderBy = OrderByPopular
+	}
+
+	query.Set("page", strconv.Itoa(o.Page))
+	query.Set("per_page", strconv.Itoa(o.PerPage))
+	query.Set("order_by", string(o.OrderBy))
+
+	return query
+}
+
+func (c *Client) GetPhotos(ctx context.Context, opts GetPhotosOptions) ([]Photo, error) {
+	if err := opts.validate(); err != nil {
+		return nil, err
+	}
+
+	u := apiURL + "/photos?" + opts.query().Encode()
+
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, handleError(resp)
+	}
+
+	var photos []Photo
+	if err := json.NewDecoder(resp.Body).Decode(&photos); err != nil {
+		return nil, err
+	}
+
+	return photos, nil
+}
