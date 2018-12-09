@@ -51,3 +51,15 @@ func TestClient_GetCuratedPhotos(t *testing.T) {
 
 	fmt.Println(photos[0].Urls.Full)
 }
+
+func TestClient_GetPhoto(t *testing.T) {
+	c, err := unsplash.New(unsplash.WithHttpClient(httpClient))
+	require.Nil(t, err)
+
+	id := "Mg0W1N_yDv0"
+	photo, err := c.GetPhoto(context.Background(), id)
+	require.Nil(t, err)
+
+	assert.NotNil(t, photo)
+	assert.Equal(t, photo.ID, id)
+}
