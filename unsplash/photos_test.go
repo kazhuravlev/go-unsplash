@@ -125,3 +125,33 @@ func TestClient_UpdatePhoto(t *testing.T) {
 	assert.NotNil(t, photo)
 	assert.Equal(t, photo.Location.Name, "example")
 }
+
+func TestClient_LikePhoto(t *testing.T) {
+	c, err := unsplash.New(unsplash.WithHttpClient(httpClient))
+	require.Nil(t, err)
+
+	id := "pnNR3P5m15s"
+	photo, rl, err := c.LikePhoto(context.Background(), id)
+	require.Nil(t, err)
+	assert.NotNil(t, rl)
+	assert.True(t, rl.Limit >= minLimits)
+	assert.NotEqual(t, rl.Remaining, 0)
+
+	assert.NotNil(t, photo)
+	assert.Equal(t, photo.Location.Name, "example")
+}
+
+func TestClient_UnlikePhoto(t *testing.T) {
+	c, err := unsplash.New(unsplash.WithHttpClient(httpClient))
+	require.Nil(t, err)
+
+	id := "pnNR3P5m15s"
+	photo, rl, err := c.UnlikePhoto(context.Background(), id)
+	require.Nil(t, err)
+	assert.NotNil(t, rl)
+	assert.True(t, rl.Limit >= minLimits)
+	assert.NotEqual(t, rl.Remaining, 0)
+
+	assert.NotNil(t, photo)
+	assert.Equal(t, photo.Location.Name, "example")
+}

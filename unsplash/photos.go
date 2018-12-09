@@ -521,3 +521,73 @@ func (c *Client) UpdatePhoto(ctx context.Context, opts UpdatePhotoOptions) (*Pho
 
 	return &photo, rl, nil
 }
+
+func (c *Client) LikePhoto(ctx context.Context, id string) (*Photo, *RateLimit, error) {
+	if id == "" {
+		return nil, nil, ErrBadRequest
+	}
+
+	u := fmt.Sprintf("%s/photos/%s/like", apiURL, id)
+
+	req, err := http.NewRequest(http.MethodPost, u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return nil, rl, handleError(resp)
+	}
+
+	var photo Photo
+	if err := json.NewDecoder(resp.Body).Decode(&photo); err != nil {
+		return nil, rl, err
+	}
+
+	return &photo, rl, nil
+}
+
+func (c *Client) UnlikePhoto(ctx context.Context, id string) (*Photo, *RateLimit, error) {
+	if id == "" {
+		return nil, nil, ErrBadRequest
+	}
+
+	u := fmt.Sprintf("%s/photos/%s/like", apiURL, id)
+
+	req, err := http.NewRequest(http.MethodDelete, u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, rl, handleError(resp)
+	}
+
+	var photo Photo
+	if err := json.NewDecoder(resp.Body).Decode(&photo); err != nil {
+		return nil, rl, err
+	}
+
+	return &photo, rl, nil
+}
