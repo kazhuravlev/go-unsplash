@@ -24,24 +24,61 @@ type GetRandomPhotosOptions struct {
 	Count int
 }
 
-func (c *Client) GetRandomPhotos(ctx context.Context, opts GetRandomPhotosOptions) ([]Photo, error) {
-	if opts.Count > maxListItems {
-		return nil, ErrBadRequest
+func (o GetRandomPhotosOptions) validate() error {
+	if o.Count > maxListItems {
+		return ErrBadRequest
 	}
 
-	if opts.Count < 0 {
-		return nil, ErrBadRequest
+	if o.Count < 0 {
+		return ErrBadRequest
+	}
+
+	switch o.Orientation {
+	case "", OrientationLandscape, OrientationPortrait, OrientationSquarish:
+	default:
+		return ErrBadRequest
+	}
+
+	return nil
+}
+
+func (o GetRandomPhotosOptions) query() url.Values {
+	if o.Count == 0 {
+		o.Count = 1
 	}
 
 	query := url.Values{}
-	query.Set("collections", strings.Join(opts.Collections, ","))
-	query.Set("featured", opts.Featured)
-	query.Set("username", opts.Username)
-	query.Set("query", opts.Query)
-	query.Set("orientation", string(opts.Orientation))
-	query.Set("count", strconv.Itoa(opts.Count))
+	if len(o.Collections) != 0 {
+		query.Set("collections", strings.Join(o.Collections, ","))
+	}
 
-	u := apiURL + "/photos/random?" + query.Encode()
+	if o.Featured != "" {
+		query.Set("featured", o.Featured)
+	}
+
+	if o.Username != "" {
+		query.Set("username", o.Username)
+	}
+
+	if o.Query != "" {
+		query.Set("query", o.Query)
+	}
+
+	if o.Orientation != "" {
+		query.Set("orientation", string(o.Orientation))
+	}
+
+	query.Set("count", strconv.Itoa(o.Count))
+
+	return query
+}
+
+func (c *Client) GetRandomPhotos(ctx context.Context, opts GetRandomPhotosOptions) ([]Photo, error) {
+	if err := opts.validate(); err != nil {
+		return nil, err
+	}
+
+	u := apiURL + "/photos/random?" + opts.query().Encode()
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
