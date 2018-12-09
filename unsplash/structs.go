@@ -129,3 +129,19 @@ type PhotoStatistics struct {
 type PhotoDownload struct {
 	URL string `json:"url"`
 }
+
+type Tag struct {
+	Title string `json:"title"`
+}
+
+type SearchPhoto struct {
+	Photo
+	Tags      []Tag `json:"tags"`
+	PhotoTags []Tag `json:"photo_tags"`
+}
+
+type SearchResult struct {
+	Total      int           `json:"total"`
+	TotalPages int           `json:"total_pages"`
+	Results    []SearchPhoto `json:"results"`
+}

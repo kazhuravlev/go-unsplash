@@ -591,3 +591,105 @@ func (c *Client) UnlikePhoto(ctx context.Context, id string) (*Photo, *RateLimit
 
 	return &photo, rl, nil
 }
+
+type SearchPhotosOptions struct {
+	// Query Search terms.
+	Query string
+	// Page Page number to retrieve. (Optional; default: 1)
+	Page int
+	// Per_page Number of items per page. (Optional; default: 10)
+	PerPage int
+	// Collections Collection ID(‘s) to narrow search. If multiple, comma-separated.
+	Collections []string
+	// Orientation Filter search results by photo orientation. Valid values are landscape, portrait, and squarish.
+	Orientation Orientation
+}
+
+func (o SearchPhotosOptions) validate() error {
+	if o.Page < 0 {
+		return ErrBadRequest
+	}
+
+	if o.PerPage < 0 {
+		return ErrBadRequest
+	}
+
+	if o.PerPage > maxListItems {
+		return ErrBadRequest
+	}
+
+	switch o.Orientation {
+	case "", OrientationLandscape, OrientationPortrait, OrientationSquarish:
+	default:
+		return ErrBadRequest
+	}
+
+	if o.Query != "" && len(o.Collections) != 0 {
+		return ErrBadRequest
+	}
+
+	return nil
+}
+
+func (o SearchPhotosOptions) query() url.Values {
+	query := url.Values{}
+	if o.Page == 0 {
+		o.Page = 1
+	}
+
+	if o.PerPage == 0 {
+		o.PerPage = 10
+	}
+
+	if len(o.Collections) != 0 {
+		query.Set("collections", strings.Join(o.Collections, ","))
+	}
+
+	if o.Query != "" {
+		query.Set("query", o.Query)
+	}
+
+	if o.Orientation != "" {
+		query.Set("orientation", string(o.Orientation))
+	}
+
+	query.Set("page", strconv.Itoa(o.Page))
+	query.Set("per_page", strconv.Itoa(o.PerPage))
+
+	return query
+}
+
+func (c *Client) SearchPhotos(ctx context.Context, opts SearchPhotosOptions) (*SearchResult, *RateLimit, error) {
+	if err := opts.validate(); err != nil {
+		return nil, nil, err
+	}
+
+	u := fmt.Sprintf("%s/search/photos?%s", apiURL, opts.query().Encode())
+
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, rl, handleError(resp)
+	}
+
+	var searchRes SearchResult
+	if err := json.NewDecoder(resp.Body).Decode(&searchRes); err != nil {
+		return nil, rl, err
+	}
+
+	return &searchRes, rl, nil
+}

@@ -155,3 +155,19 @@ func TestClient_UnlikePhoto(t *testing.T) {
 	assert.NotNil(t, photo)
 	assert.Equal(t, photo.Location.Name, "example")
 }
+
+func TestClient_SearchPhotos(t *testing.T) {
+	c, err := unsplash.New(unsplash.WithHttpClient(httpClient))
+	require.Nil(t, err)
+
+	res, rl, err := c.SearchPhotos(context.Background(), unsplash.SearchPhotosOptions{Query: "car"})
+	require.Nil(t, err)
+	assert.NotNil(t, rl)
+	assert.True(t, rl.Limit >= minLimits)
+	assert.NotEqual(t, rl.Remaining, 0)
+
+	assert.NotNil(t, res)
+	assert.NotEqual(t, res.Total, 0)
+	assert.NotEqual(t, res.TotalPages, 0)
+	assert.NotEmpty(t, res.Results)
+}
