@@ -11,6 +11,7 @@ var (
 	ErrInvalidLimits = errors.New("invalid limits")
 	ErrBadRequest    = errors.New("bad request")
 	ErrUnauthorized  = errors.New("unauthorized")
+	ErrForbidden     = errors.New("forbidden")
 )
 
 const (
@@ -31,6 +32,8 @@ func handleError(resp *http.Response) error {
 		return ErrBadRequest
 	case http.StatusUnauthorized:
 		return ErrUnauthorized
+	case http.StatusForbidden:
+		return ErrForbidden
 	default:
 		return ErrUnexpected
 	}
