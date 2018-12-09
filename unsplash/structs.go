@@ -181,3 +181,9 @@ type CollectionSearchResult struct {
 	TotalPages int          `json:"total_pages"`
 	Results    []Collection `json:"results"`
 }
+
+type UsersSearchResult struct {
+	Total      int    `json:"total"`
+	TotalPages int    `json:"total_pages"`
+	Results    []User `json:"results"`
+}
