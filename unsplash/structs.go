@@ -105,3 +105,23 @@ type Photo struct {
 	Views                  int                     `json:"views"`
 	Slug                   string                  `json:"slug"`
 }
+
+type Stat struct {
+	Total      int `json:"total"`
+	Historical struct {
+		Change     int    `json:"change"`
+		Resolution string `json:"resolution"`
+		Quantity   int    `json:"quantity"`
+		Values     []struct {
+			Date  string `json:"date"`
+			Value int    `json:"value"`
+		} `json:"values"`
+	} `json:"historical"`
+}
+
+type PhotoStatistics struct {
+	ID        string `json:"id"`
+	Downloads Stat   `json:"downloads"`
+	Views     Stat   `json:"views"`
+	Likes     Stat   `json:"likes"`
+}

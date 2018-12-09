@@ -3,6 +3,7 @@ package unsplash
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -251,4 +252,82 @@ func (c *Client) GetPhoto(ctx context.Context, id string) (*Photo, error) {
 	}
 
 	return &photo, nil
+}
+
+type Resolution string
+
+const (
+	ResolutionDays Resolution = "days"
+)
+
+type GetPhotoStatisticsOptions struct {
+	// ID The public id of the photo
+	ID string
+	// Resolution The frequency of the stats
+	Resolution Resolution
+	// Quantity The amount of for each stat
+	Quantity int
+}
+
+func (o GetPhotoStatisticsOptions) validate() error {
+	if o.ID == "" {
+		return ErrBadRequest
+	}
+
+	if o.Quantity < 0 {
+		return ErrBadRequest
+	}
+
+	if o.Quantity > maxListItems {
+		return ErrBadRequest
+	}
+
+	return nil
+}
+
+func (o GetPhotoStatisticsOptions) query() url.Values {
+	query := url.Values{}
+
+	if o.Resolution == "" {
+		o.Resolution = ResolutionDays
+	}
+
+	if o.Quantity == 0 {
+		o.Quantity = 1
+	}
+
+	query.Set("resolution", string(o.Resolution))
+	query.Set("quantity", strconv.Itoa(o.Quantity))
+
+	return query
+}
+
+func (c *Client) GetPhotoStatistics(ctx context.Context, opts GetPhotoStatisticsOptions) (*PhotoStatistics, error) {
+	if err := opts.validate(); err != nil {
+		return nil, err
+	}
+
+	u := fmt.Sprintf("%s/photos/%s/statistics?%s", apiURL, opts.ID, opts.query().Encode())
+
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, handleError(resp)
+	}
+
+	var stat PhotoStatistics
+	if err := json.NewDecoder(resp.Body).Decode(&stat); err != nil {
+		return nil, err
+	}
+
+	return &stat, nil
 }
