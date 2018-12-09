@@ -693,3 +693,80 @@ func (c *Client) SearchPhotos(ctx context.Context, opts SearchPhotosOptions) (*S
 
 	return &searchRes, rl, nil
 }
+
+type SearchCollectionsOptions struct {
+	Query   string
+	PerPage int
+	Page    int
+}
+
+func (o SearchCollectionsOptions) validate() error {
+	if o.Page < 0 {
+		return ErrBadRequest
+	}
+
+	if o.PerPage < 0 {
+		return ErrBadRequest
+	}
+
+	if o.PerPage > maxListItems {
+		return ErrBadRequest
+	}
+
+	return nil
+}
+
+func (o SearchCollectionsOptions) query() url.Values {
+	query := url.Values{}
+	if o.Page == 0 {
+		o.Page = 1
+	}
+
+	if o.PerPage == 0 {
+		o.PerPage = 10
+	}
+
+	if o.Query != "" {
+		query.Set("query", o.Query)
+	}
+
+	query.Set("page", strconv.Itoa(o.Page))
+	query.Set("per_page", strconv.Itoa(o.PerPage))
+
+	return query
+}
+
+func (c *Client) SearchCollections(ctx context.Context, opts SearchCollectionsOptions) (*CollectionSearchResult, *RateLimit, error) {
+	if err := opts.validate(); err != nil {
+		return nil, nil, err
+	}
+
+	u := fmt.Sprintf("%s/search/collections?%s", apiURL, opts.query().Encode())
+
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+
+	rl, err := getLimits(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, rl, handleError(resp)
+	}
+
+	var searchRes CollectionSearchResult
+	if err := json.NewDecoder(resp.Body).Decode(&searchRes); err != nil {
+		return nil, rl, err
+	}
+
+	return &searchRes, rl, nil
+}

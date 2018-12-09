@@ -145,3 +145,39 @@ type SearchResult struct {
 	TotalPages int           `json:"total_pages"`
 	Results    []SearchPhoto `json:"results"`
 }
+
+type CollectionLinks struct {
+	Self    string `json:"self"`
+	HTML    string `json:"html"`
+	Photos  string `json:"photos"`
+	Related string `json:"related"`
+}
+
+type PreviewPhoto struct {
+	ID   string `json:"id"`
+	Urls Urls   `json:"urls"`
+}
+
+type Collection struct {
+	ID            int             `json:"id"`
+	Title         string          `json:"title"`
+	Description   string          `json:"description"`
+	PublishedAt   string          `json:"published_at"`
+	UpdatedAt     string          `json:"updated_at"`
+	Curated       bool            `json:"curated"`
+	Featured      bool            `json:"featured"`
+	TotalPhotos   int             `json:"total_photos"`
+	Private       bool            `json:"private"`
+	ShareKey      string          `json:"share_key"`
+	Tags          []Tag           `json:"tags"`
+	CoverPhoto    Photo           `json:"cover_photo"`
+	PreviewPhotos []PreviewPhoto  `json:"preview_photos"`
+	User          User            `json:"user"`
+	Links         CollectionLinks `json:"links"`
+}
+
+type CollectionSearchResult struct {
+	Total      int          `json:"total"`
+	TotalPages int          `json:"total_pages"`
+	Results    []Collection `json:"results"`
+}
