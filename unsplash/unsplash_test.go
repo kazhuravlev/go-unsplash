@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kazhuravlev/go-unsplash/unsplash"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 	"log"
@@ -51,6 +52,9 @@ func TestGetRandomPhotos(t *testing.T) {
 
 	photos, err := c.GetRandomPhotos(context.Background(), unsplash.GetRandomPhotosOptions{Orientation: unsplash.OrientationLandscape})
 	require.Nil(t, err)
+
+	assert.NotNil(t, photos)
+	assert.Len(t, photos, 1)
 
 	fmt.Println(photos[0].Urls.Full)
 }
